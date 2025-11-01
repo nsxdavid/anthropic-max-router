@@ -65,8 +65,8 @@ async function main() {
     console.log('\n' + '='.repeat(70) + '\n');
 
     console.log('✅ All tests passed!');
-    console.log('\n💰 Billing: These requests are covered by your MAX subscription ($200/month flat rate)');
-    console.log('   No per-token charges applied! 🎉\n');
+    console.log('\n💰 Billing: These requests are covered by your MAX subscription');
+    console.log('   ($100/month or $200/month flat rate - no per-token charges!) 🎉\n');
 
   } catch (error) {
     console.error('\n❌ Test failed:', error);

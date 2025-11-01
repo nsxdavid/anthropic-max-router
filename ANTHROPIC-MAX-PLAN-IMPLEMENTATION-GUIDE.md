@@ -8,11 +8,11 @@
 
 ## Overview
 
-This guide explains how to use Anthropic's OAuth tokens from a Claude MAX subscription ($200/month) to access premium models (Sonnet 4.5, Opus) with **flat-rate billing** instead of pay-per-token API charges.
+This guide explains how to use Anthropic's OAuth tokens from a Claude MAX subscription ($100/month or $200/month tiers) to access premium models (Sonnet 4.5, Opus) with **flat-rate billing** instead of pay-per-token API charges.
 
 ### Why This Matters
 
-- **Cost**: MAX subscription = $200/month unlimited vs pay-per-token pricing
+- **Cost**: MAX subscription = $100 or $200/month flat rate (5x or 20x Pro usage) vs pay-per-token pricing
 - **Use Case**: Perfect for AI coding agents that make many requests
 - **Models**: Access to Sonnet 4.5, Opus, and other premium models
 - **Billing**: All inference costs included in flat-rate subscription
@@ -31,7 +31,7 @@ Anthropic validates OAuth requests to ensure they come from legitimate coding as
 
 ## Prerequisites
 
-1. **Claude MAX Subscription** ($200/month from claude.ai)
+1. **Claude MAX Subscription** ($100/month or $200/month from claude.ai)
 2. **OAuth Token** obtained through PKCE flow
 3. **Refresh Token** for token renewal (tokens expire every 8 hours)
 
@@ -505,7 +505,7 @@ async function getValidAccessToken() {
 ### Not Getting Flat-Rate Billing
 
 **Check**:
-1. Subscription is Claude MAX ($200/month), not Pro
+1. Subscription is Claude MAX ($100 or $200/month tiers), not Pro ($20/month)
 2. OAuth from `https://claude.ai/oauth/authorize` (not console)
 3. Scope includes `user:inference user:profile`
 
@@ -609,8 +609,8 @@ req.end();
 
 ### What This Enables
 
-- ✅ Flat-rate billing at $200/month
-- ✅ Unlimited inference within fair use
+- ✅ Flat-rate billing at $100/month (5x Pro) or $200/month (20x Pro)
+- ✅ High-volume inference with predictable costs
 - ✅ Access to all premium models
 - ✅ No per-token charges
 - ✅ Perfect for AI coding agents

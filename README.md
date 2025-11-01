@@ -6,7 +6,7 @@
 >
 > This project is provided for educational, research, and entertainment purposes only. It is not affiliated with, endorsed by, or sponsored by Anthropic PBC. Use of this software is at your own risk. The authors and contributors make no warranties and accept no liability for any damages or issues arising from use of this code. Users are responsible for ensuring their use complies with Anthropic's Terms of Service and all applicable laws. This software is provided "as-is" without any express or implied warranties.
 
-A complete TypeScript proof-of-concept demonstrating how to use Anthropic's Claude MAX subscription ($200/month) for **flat-rate billing** instead of pay-per-token API charges.
+A complete TypeScript proof-of-concept demonstrating how to use Anthropic's Claude MAX subscription ($100/month or $200/month tiers) for **flat-rate billing** instead of pay-per-token API charges.
 
 ## What This Does
 
@@ -19,9 +19,10 @@ This project shows how to:
 
 ## Prerequisites
 
-1. **Claude MAX Subscription** ($200/month from [claude.ai](https://claude.ai))
+1. **Claude MAX Subscription** ($100/month or $200/month from [claude.ai](https://claude.ai))
    - NOT Claude Pro ($20/month) - that's different
-   - MAX plan includes unlimited API inference
+   - MAX plan includes high-volume API inference with flat-rate billing
+   - $100/month tier: 5x usage vs Pro | $200/month tier: 20x usage vs Pro
 2. **Node.js** 18 or higher
 3. **npm** or **yarn**
 
@@ -291,11 +292,11 @@ npm run oauth
 - Heavy usage: $500-1000+/month easily
 
 **MAX Plan OAuth**:
-- $200/month flat rate
-- Unlimited inference
+- $100/month (5x Pro limits) or $200/month (20x Pro limits) flat rate
+- High-volume inference with predictable costs
 - Perfect for AI coding tools, chatbots, automation
 
-**Savings**: Potentially $300-800+/month for high-volume applications!
+**Savings**: Potentially $200-1000+/month for high-volume applications compared to pay-per-token pricing!
 
 ## Production Deployment
 
