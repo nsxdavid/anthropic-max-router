@@ -46,12 +46,12 @@ The interactive CLI provides a simple menu-driven interface.
 1. Run `npm run cli` and select option 1
 2. Visit the authorization URL in your browser
 3. Authorize the application with your MAX plan account
-4. Copy the full redirect URL from your browser
-5. Paste it back into the CLI
+4. The redirect page will show a code and state
+5. Copy both and paste in format: `code#state`
 
-The redirect URL will look like:
+Example format:
 ```
-https://console.anthropic.com/oauth/code/callback?code=...&state=...
+abc123xyz...#def456uvw...
 ```
 
 **Features:**

@@ -75,9 +75,9 @@ authUrl.searchParams.set('code_challenge_method', 'S256');
 authUrl.searchParams.set('state', state);  // Required for CSRF protection
 
 // 4. User visits authUrl and authorizes
-// After authorization, user is redirected to:
-// https://console.anthropic.com/oauth/code/callback?code=...&state=...
-// User copies the full URL and pastes it back to your application
+// After authorization, page displays code and state
+// User copies both in format: code#state
+// Example: abc123xyz...#def456uvw...
 // IMPORTANT: Verify returned state matches the generated state before proceeding
 
 // 5. Exchange code for tokens
