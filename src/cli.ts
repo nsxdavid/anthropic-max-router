@@ -78,16 +78,17 @@ async function handleAuthenticate() {
     const tokens = await exchangeCodeForTokens(code, verifier, state);
     await saveTokens(tokens);
 
+    console.log('✅ Tokens saved to .oauth-tokens.json');
     console.log('✅ Authentication successful!\n');
     console.log('Token details:');
     console.log(`  Scope: ${tokens.scope}`);
     console.log(`  Expires in: ${Math.floor(tokens.expires_in / 3600)} hours`);
     console.log('');
 
-    await question('Press ENTER to continue...');
+    const answer = await question('Press ENTER to continue...');
   } catch (error) {
     console.error('\n❌ Authentication failed:', error instanceof Error ? error.message : error);
-    await question('\nPress ENTER to continue...');
+    const answer = await question('\nPress ENTER to continue...');
   }
 }
 

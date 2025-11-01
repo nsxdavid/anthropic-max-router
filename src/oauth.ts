@@ -148,12 +148,11 @@ export async function startOAuthFlow(): Promise<{ code: string; verifier: string
   console.log('Example: abc123xyz...#def456uvw...');
   console.log('='.repeat(70) + '\n');
 
-  // Import readline dynamically with paste bracketing disabled
+  // Import readline dynamically
   const readline = await import('readline');
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout,
-    terminal: false  // Disable terminal-specific features to avoid paste doubling
+    output: process.stdout
   });
 
   return new Promise((resolve, reject) => {
