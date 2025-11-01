@@ -8,6 +8,7 @@
     "build": "tsc",
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js",
+    "cli": "tsx src/cli.ts",
     "oauth": "tsx src/oauth-flow.ts",
     "test": "tsx src/test-request.ts",
     "clean": "rm -rf dist"

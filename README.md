@@ -34,39 +34,65 @@ This project shows how to:
 npm install
 ```
 
-### 2. Run OAuth Flow
+### 2. Run Interactive CLI
 
-This will open a browser for you to authorize the application:
+```bash
+npm run cli
+```
 
+The interactive CLI provides a simple menu-driven interface:
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║   Anthropic MAX Plan OAuth - Interactive CLI                     ║
+║   Educational & Entertainment Purposes Only                       ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+AUTHENTICATION STATUS
+======================================================================
+❌ Not authenticated
+   Use option 1 to authenticate
+
+======================================================================
+ANTHROPIC MAX PLAN OAUTH - INTERACTIVE CLI
+======================================================================
+
+Options:
+  1. Authenticate with Anthropic MAX Plan
+  2. Refresh Token
+  3. Send Chat Message
+  4. Exit
+
+Select option (1-4):
+```
+
+**Features:**
+- ✅ Shows current authentication status on startup
+- ✅ Interactive menu with clear options
+- ✅ Option 1: Authenticate (opens browser for OAuth)
+- ✅ Option 2: Refresh token when needed
+- ✅ Option 3: Send messages (press ENTER for test message)
+- ✅ Automatic error handling and guidance
+- ✅ Returns to menu after each action
+
+### Alternative: Individual Scripts
+
+If you prefer separate scripts:
+
+**Authenticate:**
 ```bash
 npm run oauth
 ```
 
-Follow the prompts:
-1. Browser will open to Claude.ai authorization page
-2. Sign in with your MAX subscription account
-3. Authorize the application
-4. OAuth tokens will be saved to `.oauth-tokens.json`
-
-### 3. Test the Implementation
-
+**Test:**
 ```bash
 npm test
 ```
 
-This will:
-- Load your OAuth tokens
-- Automatically refresh if expired
-- Send test requests to Claude Sonnet 4.5
-- Display responses
-
-### 4. Build for Production
-
+**Build for Production:**
 ```bash
 npm run build
 ```
-
-Compiled JavaScript will be in `dist/` directory.
 
 ## Project Structure
 
