@@ -104,17 +104,17 @@ export async function exchangeCodeForTokens(
  * Refresh access token using refresh token
  */
 export async function refreshAccessToken(refreshToken: string): Promise<OAuthTokens> {
-  // OAuth 2.0 spec (RFC 6749) requires application/x-www-form-urlencoded
-  const params = new URLSearchParams({
+  // Anthropic uses JSON format
+  const requestBody = {
     grant_type: 'refresh_token',
     client_id: OAUTH_CONFIG.client_id,
     refresh_token: refreshToken
-  });
+  };
 
   const response = await fetch(OAUTH_CONFIG.token_url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params.toString()
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {

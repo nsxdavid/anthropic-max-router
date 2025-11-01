@@ -26,13 +26,13 @@ async function main() {
     console.log('This will obtain OAuth tokens for flat-rate MAX plan billing.\n');
 
     // Start the OAuth flow
-    const { code, verifier } = await startOAuthFlow();
+    const { code, verifier, state } = await startOAuthFlow();
 
     console.log('✅ Authorization code received');
     console.log('🔄 Exchanging code for tokens...\n');
 
     // Exchange code for tokens
-    const tokens = await exchangeCodeForTokens(code, verifier);
+    const tokens = await exchangeCodeForTokens(code, verifier, state);
 
     // Save tokens
     await saveTokens(tokens);
