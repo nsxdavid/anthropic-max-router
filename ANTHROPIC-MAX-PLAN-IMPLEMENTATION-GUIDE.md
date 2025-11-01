@@ -106,14 +106,17 @@ const tokens = await tokenResponse.json();
 
 ```javascript
 async function refreshAccessToken(refresh_token) {
+  // OAuth 2.0 spec (RFC 6749) requires application/x-www-form-urlencoded
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    client_id: '9d1c250a-e61b-44d9-88ed-5944d1962f5e',
+    refresh_token: refresh_token
+  });
+
   const response = await fetch('https://console.anthropic.com/v1/oauth/token', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'refresh_token',
-      client_id: '9d1c250a-e61b-44d9-88ed-5944d1962f5e',
-      refresh_token: refresh_token
-    })
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString()
   });
 
   return await response.json();
