@@ -1,9 +1,17 @@
 # Anthropic MAX Plan OAuth - TypeScript Implementation
 
+<div align="center">
+
+![Anthropic MAX Plan OAuth CLI](assets/screenshot.png)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Status](https://img.shields.io/badge/Status-Verified%20Working-brightgreen.svg)](https://github.com/nsxdavid/anthropic-oauth-max-plan)
+
+</div>
+
+---
 
 > **✅ Verified Working**: Tested and confirmed as of November 1st, 2025
 
@@ -12,11 +20,6 @@
 > This project is provided for educational, research, and entertainment purposes only. It is not affiliated with, endorsed by, or sponsored by Anthropic PBC. Use of this software is at your own risk. The authors and contributors make no warranties and accept no liability for any damages or issues arising from use of this code. Users are responsible for ensuring their use complies with Anthropic's Terms of Service and all applicable laws. This software is provided "as-is" without any express or implied warranties.
 
 A complete TypeScript proof-of-concept demonstrating how to use Anthropic's Claude MAX subscription ($100/month or $200/month tiers) for **flat-rate billing** instead of pay-per-token API charges.
-
-## Interactive CLI
-
-![Anthropic MAX Plan OAuth CLI](assets/screenshot.png)
-*Menu-driven interface for OAuth authentication, token management, and messaging*
 
 ## What This Does
 
