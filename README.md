@@ -13,6 +13,11 @@
 
 A complete TypeScript proof-of-concept demonstrating how to use Anthropic's Claude MAX subscription ($100/month or $200/month tiers) for **flat-rate billing** instead of pay-per-token API charges.
 
+## Interactive CLI
+
+![Anthropic MAX Plan OAuth CLI](assets/screenshot.png)
+*Menu-driven interface for OAuth authentication, token management, and messaging*
+
 ## What This Does
 
 This project shows how to:
