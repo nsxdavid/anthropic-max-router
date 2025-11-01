@@ -4,7 +4,7 @@
 
 ![Anthropic MAX Plan OAuth CLI](assets/screenshot.png)
 
-*Interactive menu-driven CLI for OAuth authentication, token management, and messaging*
+*Interactive menu-driven CLI to demonstrate Anthropic MAX plan OAuth usage*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
@@ -49,70 +49,42 @@ This project shows how to:
 npm install
 ```
 
-### 2. Run Interactive CLI
+### 2. Run the CLI
 
 ```bash
-npm run cli
+npm start
 ```
 
-The interactive CLI provides a simple menu-driven interface.
+**That's it!** The interactive CLI handles everything:
 
-**Authentication Process:**
-1. Run `npm run cli` and select option 1
+1. Select option 1 to authenticate
 2. Visit the authorization URL in your browser
-3. Authorize the application with your MAX plan account
-4. The redirect page will show a code and state
-5. Copy both and paste in format: `code#state`
+3. Authorize with your MAX plan account
+4. Copy the code#state from the redirect page
+5. Paste it into the CLI
 
-Example format:
-```
-abc123xyz...#def456uvw...
-```
-
-**Features:**
-- ✅ Shows current authentication status on startup
-- ✅ Interactive menu with clear options
-- ✅ Option 1: Authenticate (manual code copy from browser)
-- ✅ Option 2: Refresh token when needed
-- ✅ Option 3: Send messages (press ENTER for test message)
-- ✅ Option 4: Logout (delete stored tokens)
-- ✅ Automatic error handling and guidance
-- ✅ Returns to menu after each action
-
-### Alternative: Individual Scripts
-
-If you prefer separate scripts:
-
-**Authenticate:**
-```bash
-npm run oauth
-```
-
-**Test:**
-```bash
-npm test
-```
-
-**Build for Production:**
-```bash
-npm run build
-```
+**Menu Options:**
+- **Option 1:** Authenticate with Anthropic MAX Plan
+- **Option 2:** Refresh Token
+- **Option 3:** Send Chat Message
+- **Option 4:** Logout (Delete Tokens)
+- **Option 5:** Proof of MAX Plan (Validation Test)
+- **Option 6:** Exit
 
 ## Project Structure
 
 ```
 anthropic-oauth-max-plan/
 ├── src/
-│   ├── types.ts              # TypeScript type definitions
-│   ├── oauth.ts              # OAuth flow implementation
-│   ├── client.ts             # Anthropic API client
-│   ├── token-manager.ts      # Token storage and refresh
-│   ├── oauth-flow.ts         # Script to run OAuth flow
-│   ├── test-request.ts       # Test script
-│   └── index.ts              # Main exports
+│   ├── cli.ts               # Interactive CLI (entry point)
+│   ├── oauth.ts             # OAuth flow implementation
+│   ├── client.ts            # Anthropic API client
+│   ├── token-manager.ts     # Token storage and refresh
+│   └── types.ts             # TypeScript type definitions
+├── assets/
+│   └── screenshot.png       # CLI screenshot
 ├── ANTHROPIC-MAX-PLAN-IMPLEMENTATION-GUIDE.md  # Detailed technical docs
 ├── package.json
-├── tsconfig.json
 └── README.md
 ```
 
@@ -254,36 +226,11 @@ With MAX plan OAuth, you can access:
 
 All billed at **$200/month flat rate** - no per-token charges!
 
-## Development Scripts
-
-```bash
-# Run OAuth flow to get tokens
-npm run oauth
-
-# Run test script
-npm test
-
-# Build TypeScript to JavaScript
-npm run build
-
-# Run TypeScript file directly (dev mode)
-npm run dev
-
-# Start compiled version
-npm start
-
-# Clean build directory
-npm run clean
-```
-
 ## Troubleshooting
 
 ### "No tokens found"
 
-Run the OAuth flow first:
-```bash
-npm run oauth
-```
+Run `npm start` and select option 1 to authenticate.
 
 ### "This credential is only authorized for use with Claude Code"
 
@@ -302,10 +249,7 @@ Use `getValidAccessToken()` instead of reading tokens directly - it auto-refresh
 
 ### Token refresh fails
 
-You may need to re-run the OAuth flow:
-```bash
-npm run oauth
-```
+Run `npm start`, select option 4 to logout, then option 1 to re-authenticate.
 
 ## Security Best Practices
 

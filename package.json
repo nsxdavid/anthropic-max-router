@@ -5,13 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/index.js",
-    "cli": "tsx src/cli.ts",
-    "oauth": "tsx src/oauth-flow.ts",
-    "test": "tsx src/test-request.ts",
-    "clean": "rm -rf dist"
+    "start": "tsx src/cli.ts"
   },
   "keywords": [
     "anthropic",
