@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.2] - 2025-11-03
+
+### Fixed
+- **npx compatibility** - Package now properly compiles TypeScript before publishing
+  - Added `build` script to compile TypeScript to `dist/`
+  - Added `prepublishOnly` hook to auto-build before publishing
+  - Updated `bin` paths to point to compiled `.js` files instead of source `.ts` files
+  - Added `files` field to control npm package contents
+  - `npx anthropic-max-router` now works correctly
+
 ## [1.1.1] - 2025-11-02
 
 ### Changed

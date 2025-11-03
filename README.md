@@ -6,6 +6,7 @@
 
 *Educational proof-of-concept and practical tools for using Anthropic's Claude MAX Plan with OAuth authentication*
 
+[![npm version](https://img.shields.io/npm/v/anthropic-max-router.svg)](https://www.npmjs.com/package/anthropic-max-router)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -26,7 +27,7 @@ npm start
 ### 🚀 **2. API Router** - Production Ready
 A standalone HTTP proxy that lets ANY AI tool use your MAX Plan subscription via `http://localhost:3000`.
 ```bash
-npm run router
+npx anthropic-max-router
 ```
 
 ### 📚 **3. Implementation Guide** - Complete Documentation
@@ -59,21 +60,44 @@ This repository provides **both practical tools and complete documentation** for
 
 ---
 
-## Quick Start
+## ⚡ Quick Start - Run Without Installing
 
-### Option 1: Run Directly with npx (No Install)
+**The fastest way to get started** - no git clone, no npm install needed:
 
 ```bash
-# Run the router directly from GitHub
+npx anthropic-max-router
+```
+
+That's it! The router will:
+1. Automatically authenticate you via OAuth (first run only)
+2. Start the proxy server on http://localhost:3000
+3. Let you use MAX Plan billing from any tool that supports custom base URLs
+
+### With Options
+
+```bash
+npx anthropic-max-router --help              # Show all options
+npx anthropic-max-router --port 8080         # Custom port
+npx anthropic-max-router --verbose           # Full request logging
+npx anthropic-max-router -p 8080 --minimal   # Combine options
+```
+
+### Alternative Methods
+
+<details>
+<summary><b>Option 2: Run from GitHub (Latest Dev Version)</b></summary>
+
+```bash
+# Run directly from GitHub repository
 npx github:nsxdavid/anthropic-max-router
 
 # With options
-npx github:nsxdavid/anthropic-max-router --help
-npx github:nsxdavid/anthropic-max-router --port 8080
-npx github:nsxdavid/anthropic-max-router --verbose
+npx github:nsxdavid/anthropic-max-router --port 8080 --verbose
 ```
+</details>
 
-### Option 2: Clone and Run
+<details>
+<summary><b>Option 3: Clone and Run (For Development)</b></summary>
 
 ```bash
 # Clone the repository
@@ -87,6 +111,7 @@ npm run router
 # OR run the interactive CLI
 npm start
 ```
+</details>
 
 ---
 
