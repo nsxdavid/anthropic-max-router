@@ -142,20 +142,36 @@ const handleMessagesRequest = async (req: Request, res: Response) => {
       body: JSON.stringify(modifiedRequest),
     });
 
-    // Get the response data
-    const responseData = await response.json() as AnthropicResponse;
-
-    // Log the request
-    logger.logRequest(
-      requestId,
-      timestamp,
-      originalRequest,
-      hadSystemPrompt,
-      { status: response.status, data: responseData }
-    );
-
     // Forward the status code and response
-    res.status(response.status).json(responseData);
+    if (response.headers.get('content-type')?.includes('text/event-stream')) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.status(response.status);
+      // Pipe the Anthropic response stream directly to the client
+      for await (const chunk of response.body as any) {
+        res.write(chunk);
+      }
+      res.end();
+      // Logging for streaming responses
+      logger.logRequest(
+        requestId,
+        timestamp,
+        originalRequest,
+        hadSystemPrompt,
+        { status: response.status, data: null as any }
+      );
+    } else {
+      const responseData = await response.json() as AnthropicResponse;
+      logger.logRequest(
+        requestId,
+        timestamp,
+        originalRequest,
+        hadSystemPrompt,
+        { status: response.status, data: responseData }
+      );
+      res.status(response.status).json(responseData);
+    }
 
   } catch (error) {
     // Log the error

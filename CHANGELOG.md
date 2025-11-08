@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.4] - 2025-11-08
+
+### Fixed
+- **Streaming support** - Router now properly handles streaming responses from Anthropic API
+  - Detects `text/event-stream` content type and pipes the stream directly to client
+  - Fixes issues with tools that require streaming responses
+  - Maintains proper headers and connection handling for SSE
+
 ## [1.1.3] - 2025-11-05
 
 ### Fixed
