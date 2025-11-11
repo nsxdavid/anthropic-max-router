@@ -6,14 +6,29 @@ export const REQUIRED_SYSTEM_PROMPT: SystemMessage = {
 };
 
 /**
+ * Normalizes system prompt to SystemMessage[] format
+ * Handles both string and array inputs
+ */
+function normalizeSystemPrompt(system?: SystemMessage[] | string): SystemMessage[] {
+  if (!system) {
+    return [];
+  }
+  if (typeof system === 'string') {
+    return [{ type: 'text', text: system }];
+  }
+  return system;
+}
+
+/**
  * Checks if the first system message matches the required Claude Code prompt
  */
-function hasRequiredSystemPrompt(system?: SystemMessage[]): boolean {
-  if (!system || system.length === 0) {
+function hasRequiredSystemPrompt(system?: SystemMessage[] | string): boolean {
+  const normalizedSystem = normalizeSystemPrompt(system);
+  if (normalizedSystem.length === 0) {
     return false;
   }
 
-  const firstMessage = system[0];
+  const firstMessage = normalizedSystem[0];
   return (
     firstMessage.type === 'text' &&
     firstMessage.text === REQUIRED_SYSTEM_PROMPT.text
@@ -31,8 +46,8 @@ export function ensureRequiredSystemPrompt(request: AnthropicRequest): Anthropic
     return request;
   }
 
-  // Otherwise, prepend the required prompt
-  const existingSystem = request.system || [];
+  // Otherwise, prepend the required normalized prompt
+  const existingSystem = normalizeSystemPrompt(request.system);
   return {
     ...request,
     system: [REQUIRED_SYSTEM_PROMPT, ...existingSystem]
