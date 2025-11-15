@@ -1,66 +1,57 @@
-# Contributing
+# Contributing to Anthropic MAX Plan Router
 
-Thanks for your interest in contributing to this project!
+Thank you for your interest in contributing! This project welcomes contributions from the community.
 
 ## How to Contribute
 
-This is a proof-of-concept demonstration project. Contributions are welcome in the form of:
+### Reporting Issues
 
-- **Bug reports** - If something doesn't work as documented
-- **Documentation improvements** - Clarifications, corrections, or additions
-- **Code improvements** - Bug fixes, refactoring, or enhancements
-- **Testing** - Verification on different platforms or configurations
+- Check existing issues before creating a new one
+- Include as much detail as possible:
+  - Node.js version
+  - Operating system
+  - Steps to reproduce
+  - Expected vs actual behavior
+  - Router logs (use `--verbose` flag)
 
-## Getting Started
+### Suggesting Features
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/anthropic-oauth-max-plan.git`
-3. Install dependencies: `npm install`
-4. Make your changes
-5. Test your changes: `npm run cli`
-6. Commit with clear messages
-7. Push to your fork
-8. Open a Pull Request
+- Open an issue with the `enhancement` label
+- Describe the use case and benefits
+- Include examples if possible
 
-## Guidelines
+### Code Contributions
 
-### Code Style
-- Use TypeScript
-- Follow existing code formatting
-- Add types for all functions and variables
-- Include comments for complex logic
+1. **Fork the repository**
+2. **Create a feature branch**
+3. **Make your changes**
+4. **Test thoroughly** - See [TESTING.md](TESTING.md)
+5. **Submit a Pull Request**
 
-### Commits
-- Use clear, descriptive commit messages
-- Reference issues if applicable
-- Keep commits focused on a single change
+## Development Setup
 
-### Pull Requests
-- Describe what your PR does and why
-- Reference any related issues
-- Ensure the CLI still works: `npm run cli`
-- Update documentation if needed
+\`\`\`bash
+git clone https://github.com/nsxdavid/anthropic-max-router
+cd anthropic-max-router
+npm install
+npm run build
+\`\`\`
 
-### Security
-- **Never commit tokens or API keys**
-- Check that `.oauth-tokens.json` remains in `.gitignore`
-- Verify sensitive data isn't logged
+## Testing
 
-## Questions?
+\`\`\`bash
+# Build
+npm run build
 
-Open an issue for:
-- Questions about the implementation
-- Feature requests
-- Bug reports
-- Documentation clarifications
+# Run router
+npm run router -- --enable-all-endpoints --verbose
 
-## Disclaimer
+# In another terminal, run tests
+node test-openai-endpoint.js
+\`\`\`
 
-This project demonstrates using Anthropic's official OAuth flow for educational purposes. All contributions must maintain:
-- Educational/entertainment disclaimers
-- Compliance with Anthropic's Terms of Service
-- No malicious code or harmful modifications
+See [TESTING.md](TESTING.md) for comprehensive testing guide.
 
----
+## License
 
-**Thank you for contributing!** 🎉
+By contributing, you agree that your contributions will be licensed under the MIT License.

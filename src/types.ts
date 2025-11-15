@@ -113,3 +113,148 @@ export interface OAuthConfig {
   redirect_uri: string;
   scope: string;
 }
+
+/**
+ * OpenAI Chat Completion Message
+ */
+export interface OpenAIMessage {
+  role: 'system' | 'user' | 'assistant' | 'tool';
+  content: string | null;
+  name?: string;
+  tool_calls?: OpenAIToolCall[];
+  tool_call_id?: string;
+}
+
+/**
+ * OpenAI Tool Call
+ */
+export interface OpenAIToolCall {
+  id: string;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string;
+  };
+}
+
+/**
+ * OpenAI Tool Definition
+ */
+export interface OpenAITool {
+  type: 'function';
+  function: {
+    name: string;
+    description: string;
+    parameters: {
+      type: 'object';
+      properties: Record<string, any>;
+      required?: string[];
+    };
+  };
+}
+
+/**
+ * OpenAI Chat Completion Request
+ */
+export interface OpenAIChatCompletionRequest {
+  model: string;
+  messages: OpenAIMessage[];
+  temperature?: number;
+  top_p?: number;
+  n?: number;
+  stream?: boolean;
+  stop?: string | string[];
+  max_tokens?: number;
+  presence_penalty?: number;
+  frequency_penalty?: number;
+  logit_bias?: Record<string, number>;
+  user?: string;
+  tools?: OpenAITool[];
+  tool_choice?: 'none' | 'auto' | { type: 'function'; function: { name: string } };
+  logprobs?: boolean;
+  top_logprobs?: number;
+}
+
+/**
+ * OpenAI Chat Completion Response Choice
+ */
+export interface OpenAIChoice {
+  index: number;
+  message: {
+    role: 'assistant';
+    content: string | null;
+    tool_calls?: OpenAIToolCall[];
+  };
+  finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | null;
+}
+
+/**
+ * OpenAI Chat Completion Response
+ */
+export interface OpenAIChatCompletionResponse {
+  id: string;
+  object: 'chat.completion';
+  created: number;
+  model: string;
+  choices: OpenAIChoice[];
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  system_fingerprint?: string;
+}
+
+/**
+ * OpenAI Streaming Delta
+ */
+export interface OpenAIStreamDelta {
+  role?: 'assistant';
+  content?: string;
+  tool_calls?: Array<{
+    index: number;
+    id?: string;
+    type?: 'function';
+    function?: {
+      name?: string;
+      arguments?: string;
+    };
+  }>;
+}
+
+/**
+ * OpenAI Streaming Choice
+ */
+export interface OpenAIStreamChoice {
+  index: number;
+  delta: OpenAIStreamDelta;
+  finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter' | null;
+}
+
+/**
+ * OpenAI Chat Completion Stream Chunk
+ */
+export interface OpenAIChatCompletionChunk {
+  id: string;
+  object: 'chat.completion.chunk';
+  created: number;
+  model: string;
+  choices: OpenAIStreamChoice[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+}
+
+/**
+ * OpenAI Error Response
+ */
+export interface OpenAIErrorResponse {
+  error: {
+    message: string;
+    type: string;
+    param?: string | null;
+    code?: string | null;
+  };
+}

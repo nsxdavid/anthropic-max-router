@@ -22,18 +22,19 @@ export class Logger {
     request: AnthropicRequest,
     hadSystemPrompt: boolean,
     response?: { status: number; data?: AnthropicResponse },
-    error?: Error
+    error?: Error,
+    endpointType: 'anthropic' | 'openai' = 'anthropic'
   ) {
     if (this.level === 'quiet') {
       return;
     }
 
     if (this.level === 'minimal') {
-      this.logMinimal(requestId, timestamp, request, response, error);
+      this.logMinimal(requestId, timestamp, request, response, error, endpointType);
     } else if (this.level === 'medium') {
-      this.logMedium(requestId, timestamp, request, hadSystemPrompt, response, error);
+      this.logMedium(requestId, timestamp, request, hadSystemPrompt, response, error, endpointType);
     } else if (this.level === 'maximum') {
-      this.logMaximum(requestId, timestamp, request, hadSystemPrompt, response, error);
+      this.logMaximum(requestId, timestamp, request, hadSystemPrompt, response, error, endpointType);
     }
   }
 
@@ -42,14 +43,16 @@ export class Logger {
     timestamp: string,
     request: AnthropicRequest,
     response?: { status: number; data?: AnthropicResponse },
-    error?: Error
+    error?: Error,
+    endpointType: 'anthropic' | 'openai' = 'anthropic'
   ) {
     const status = error ? '✗ ERROR' : response ? `✓ ${response.status}` : '...';
     const tokens = response?.data?.usage
       ? `(in:${response.data.usage.input_tokens} out:${response.data.usage.output_tokens})`
       : '';
+    const endpoint = endpointType === 'openai' ? '[OpenAI]' : '[Anthropic]';
 
-    console.log(`[${timestamp.substring(11, 19)}] ${status} ${request.model} ${tokens}`);
+    console.log(`[${timestamp.substring(11, 19)}] ${endpoint} ${status} ${request.model} ${tokens}`);
   }
 
   private logMedium(
@@ -58,11 +61,17 @@ export class Logger {
     request: AnthropicRequest,
     hadSystemPrompt: boolean,
     response?: { status: number; data?: AnthropicResponse },
-    error?: Error
+    error?: Error,
+    endpointType: 'anthropic' | 'openai' = 'anthropic'
   ) {
-    console.log(`\n[${timestamp}] [${requestId}] Incoming request`);
+    const endpoint = endpointType === 'openai' ? 'OpenAI' : 'Anthropic';
+    console.log(`\n[${timestamp}] [${requestId}] Incoming ${endpoint} request`);
     console.log(`  Model: ${request.model}`);
     console.log(`  Max tokens: ${request.max_tokens}`);
+
+    if (endpointType === 'openai') {
+      console.log(`  ✓ Translated OpenAI → Anthropic format`);
+    }
 
     if (!hadSystemPrompt) {
       console.log(`  ✓ Injected required system prompt`);
@@ -93,13 +102,19 @@ export class Logger {
     request: AnthropicRequest,
     hadSystemPrompt: boolean,
     response?: { status: number; data?: AnthropicResponse },
-    error?: Error
+    error?: Error,
+    endpointType: 'anthropic' | 'openai' = 'anthropic'
   ) {
+    const endpoint = endpointType === 'openai' ? 'OpenAI' : 'Anthropic';
     console.log('\n' + '='.repeat(80));
-    console.log(`[${timestamp}] [${requestId}] REQUEST`);
+    console.log(`[${timestamp}] [${requestId}] ${endpoint} REQUEST`);
     console.log('='.repeat(80));
-    console.log('Request Body:');
+    console.log('Request Body (Anthropic format):');
     console.log(JSON.stringify(request, null, 2));
+
+    if (endpointType === 'openai') {
+      console.log('\n✓ Translated OpenAI → Anthropic format');
+    }
 
     if (!hadSystemPrompt) {
       console.log('\n✓ Injected required system prompt');

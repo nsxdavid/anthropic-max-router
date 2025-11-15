@@ -4,6 +4,83 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] - 2025-11-15
+
+### Added
+- **OpenAI API Compatibility** - Router now supports OpenAI Chat Completions API format
+  - New endpoint: `POST /v1/chat/completions`
+  - Zero-code integration with tools built for OpenAI (Python SDK, LangChain, etc.)
+  - Bidirectional API translation (OpenAI ↔ Anthropic format)
+  - Pattern-based model mapping (gpt-4 → claude-sonnet-4-5, etc.)
+  - Full streaming support with SSE format translation
+  - Tool/function calling translation
+  - Configurable via CLI flags (opt-in for backward compatibility)
+- **Endpoint Control Flags**
+  - Both endpoints enabled by default (Anthropic + OpenAI)
+  - `--enable-openai` - Enable OpenAI compatibility endpoint (default: enabled)
+  - `--disable-openai` - Disable OpenAI endpoint
+  - `--enable-anthropic` - Enable Anthropic endpoint (default: enabled)
+  - `--disable-anthropic` - Disable Anthropic endpoint
+  - `--enable-all-endpoints` - Enable both endpoints (same as default)
+  - Validation ensures at least one endpoint is enabled
+- **Model Mapping System** (`src/router/model-mapper.ts`)
+  - Pattern-based intelligent mapping (future-proof for new OpenAI models)
+  - Low-tier detection (nano, gpt-3.5, gpt-3) → `claude-haiku-4-5`
+  - All other models → `claude-sonnet-4-5` (best for MAX Plan)
+  - Custom mapping support via `.router-mappings.json` file
+  - Environment variable override: `ANTHROPIC_DEFAULT_MODEL`
+- **Translation Layer** (`src/router/translator.ts`)
+  - Request translation: OpenAI → Anthropic format
+    - System message extraction and consolidation
+    - Message alternation enforcement (required by Anthropic)
+    - Tool definition translation
+    - Parameter mapping (temperature, max_tokens, etc.)
+  - Response translation: Anthropic → OpenAI format
+    - Content block to choices array conversion
+    - Token usage mapping (input_tokens → prompt_tokens)
+    - Finish reason translation (end_turn → stop, max_tokens → length)
+    - Tool use translation
+  - Streaming translation with SSE format conversion
+  - Request validation with helpful error messages for unsupported features
+- **Enhanced Logging** - Logger now distinguishes between Anthropic and OpenAI requests
+  - Minimal: `[OpenAI]` / `[Anthropic]` prefix
+  - Medium: "Incoming OpenAI request" / "Incoming Anthropic request"
+  - Verbose: Full translation details
+- **Type Definitions** - Added comprehensive OpenAI types to `src/types.ts`
+  - `OpenAIChatCompletionRequest` / `OpenAIChatCompletionResponse`
+  - `OpenAIMessage`, `OpenAITool`, `OpenAIToolCall`
+  - `OpenAIChatCompletionChunk` for streaming
+  - `OpenAIErrorResponse` for error translation
+
+### Changed
+- **Help text** - Updated with new endpoint control flags and environment variables
+- **Startup logging** - Router now displays which endpoints are enabled
+- **README.md** - Extensive documentation of OpenAI compatibility
+  - Model mapping table with examples
+  - Python and JavaScript usage examples with OpenAI SDK
+  - Streaming examples
+  - Custom mapping configuration instructions
+  - Feature support matrix
+  - Troubleshooting section for OpenAI compatibility
+- **Command line options table** - Reorganized with endpoint control section
+- **Project files structure** - Updated to show new modules
+
+### Features
+- ✅ OpenAI Chat Completions API endpoint (`/v1/chat/completions`)
+- ✅ Automatic model name translation (gpt-4, gpt-5, o1, o3, etc.)
+- ✅ Request/response format translation
+- ✅ Streaming support with OpenAI format
+- ✅ Tool calling translation
+- ✅ Both endpoints enabled by default for maximum compatibility
+- ✅ Flexible model mapping (pattern-based + custom overrides)
+- ✅ Works with Python OpenAI SDK, JavaScript OpenAI SDK, and any OpenAI-compatible tool
+
+### OpenAI Compatibility Notes
+- **Supported**: Messages, streaming, tools, basic parameters
+- **Not Supported**: Multiple completions (n > 1), logprobs
+- **Ignored with warning**: presence_penalty, frequency_penalty, logit_bias
+- Both endpoints enabled by default - use whichever format your tool supports!
+
 ## [1.1.4] - 2025-11-08
 
 ### Fixed

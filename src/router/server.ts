@@ -5,8 +5,20 @@ import readline from 'readline';
 import { getValidAccessToken, loadTokens, saveTokens } from '../token-manager.js';
 import { startOAuthFlow, exchangeCodeForTokens } from '../oauth.js';
 import { ensureRequiredSystemPrompt } from './middleware.js';
-import { AnthropicRequest, AnthropicResponse } from '../types.js';
+import {
+  AnthropicRequest,
+  AnthropicResponse,
+  OpenAIChatCompletionRequest,
+  OpenAIChatCompletionResponse
+} from '../types.js';
 import { logger, LogLevel } from './logger.js';
+import {
+  translateOpenAIToAnthropic,
+  translateAnthropicToOpenAI,
+  translateAnthropicStreamToOpenAI,
+  translateAnthropicErrorToOpenAI,
+  validateOpenAIRequest
+} from './translator.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -27,6 +39,12 @@ function askQuestion(prompt: string): Promise<string> {
     });
   });
 }
+
+// Endpoint configuration
+const endpointConfig = {
+  anthropicEnabled: true,  // default
+  openaiEnabled: true      // default - enable both endpoints
+};
 
 // Parse command line arguments
 function parseArgs() {
@@ -57,8 +75,26 @@ function parseArgs() {
         PORT = parseInt(portValue);
         i++; // Skip next arg since we consumed it
       }
+    } else if (arg === '--enable-all-endpoints') {
+      endpointConfig.anthropicEnabled = true;
+      endpointConfig.openaiEnabled = true;
+    } else if (arg === '--enable-openai') {
+      endpointConfig.openaiEnabled = true;
+    } else if (arg === '--disable-openai') {
+      endpointConfig.openaiEnabled = false;
+    } else if (arg === '--enable-anthropic') {
+      endpointConfig.anthropicEnabled = true;
+    } else if (arg === '--disable-anthropic') {
+      endpointConfig.anthropicEnabled = false;
     }
     // medium is default, no flag needed
+  }
+
+  // Validate that at least one endpoint is enabled
+  if (!endpointConfig.anthropicEnabled && !endpointConfig.openaiEnabled) {
+    console.error('Error: At least one endpoint must be enabled');
+    console.error('Use --enable-anthropic or --enable-openai');
+    process.exit(1);
   }
 }
 
@@ -69,29 +105,38 @@ Anthropic MAX Plan Router v${packageJson.version}
 Usage: npm run router [options]
 
 Options:
-  -h, --help        Show this help message
-  -v, --version     Show version number
-  -p, --port PORT   Port to listen on (default: 3000)
+  -h, --help                Show this help message
+  -v, --version             Show version number
+  -p, --port PORT           Port to listen on (default: 3000)
+
+  Endpoint control (default: both enabled):
+  --enable-anthropic        Enable Anthropic /v1/messages endpoint (default: enabled)
+  --disable-anthropic       Disable Anthropic endpoint
+  --enable-openai           Enable OpenAI /v1/chat/completions endpoint (default: enabled)
+  --disable-openai          Disable OpenAI endpoint
+  --enable-all-endpoints    Enable both Anthropic and OpenAI endpoints (same as default)
 
   Verbosity levels (default: medium):
-  -q, --quiet       Quiet mode - no request logging
-  -m, --minimal     Minimal logging - one line per request
-                    Default: Medium logging - summary per request
-  -V, --verbose     Maximum logging - full request/response bodies
+  -q, --quiet               Quiet mode - no request logging
+  -m, --minimal             Minimal logging - one line per request
+                            Default: Medium logging - summary per request
+  -V, --verbose             Maximum logging - full request/response bodies
 
 Environment variables:
-  ROUTER_PORT       Port to listen on (default: 3000)
+  ROUTER_PORT               Port to listen on (default: 3000)
+  ANTHROPIC_DEFAULT_MODEL   Override model mapping (e.g., claude-haiku-4-5)
 
 Examples:
-  npm run router                      # Start with medium verbosity on port 3000
-  npm run router -- --port 8080       # Start on port 8080
-  npm run router -- --minimal         # Start with minimal logging
-  npm run router -- --verbose         # Start with full request/response logging
-  npm run router -- --quiet           # Start with no request logging
-  npm run router -- -p 8080 --verbose # Combine options
-  ROUTER_PORT=8080 npm run router     # Alternative: use environment variable
+  npm run router                          # Start Anthropic endpoint only
+  npm run router -- --enable-openai       # Enable OpenAI compatibility
+  npm run router -- --enable-all-endpoints # Enable both endpoints
+  npm run router -- --port 8080           # Start on port 8080
+  npm run router -- --minimal             # Start with minimal logging
+  npm run router -- --verbose             # Start with full request/response logging
+  npm run router -- --quiet               # Start with no request logging
+  npm run router -- -p 8080 --verbose     # Combine options
 
-More info: https://github.com/nsxdavid/anthropic-oauth-max-plan
+More info: https://github.com/nsxdavid/anthropic-max-router
 `);
 }
 
@@ -204,11 +249,140 @@ const handleMessagesRequest = async (req: Request, res: Response) => {
   }
 };
 
-// Main proxy endpoint
-app.post('/v1/messages', handleMessagesRequest);
+// OpenAI Chat Completions endpoint handler
+const handleChatCompletionsRequest = async (req: Request, res: Response) => {
+  const requestId = Math.random().toString(36).substring(7);
+  const timestamp = new Date().toISOString();
 
-// Route alias to handle Stagehand v3 SDK bug that doubles the /v1 prefix
-app.post('/v1/v1/messages', handleMessagesRequest);
+  try {
+    // Get the request body as an OpenAI request
+    const openaiRequest = req.body as OpenAIChatCompletionRequest;
+
+    // Validate the request
+    validateOpenAIRequest(openaiRequest);
+
+    // Translate OpenAI request to Anthropic format
+    const anthropicRequest = translateOpenAIToAnthropic(openaiRequest);
+
+    const hadSystemPrompt = !!(anthropicRequest.system && anthropicRequest.system.length > 0);
+
+    // Ensure the required system prompt is present
+    const modifiedRequest = ensureRequiredSystemPrompt(anthropicRequest);
+
+    // Get a valid OAuth access token (auto-refreshes if needed)
+    const accessToken = await getValidAccessToken();
+
+    // Forward the request to Anthropic API
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+        'anthropic-version': ANTHROPIC_VERSION,
+        'anthropic-beta': ANTHROPIC_BETA,
+      },
+      body: JSON.stringify(modifiedRequest),
+    });
+
+    // Handle streaming responses
+    if (openaiRequest.stream && response.headers.get('content-type')?.includes('text/event-stream')) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.status(response.status);
+
+      // Generate a message ID for the stream
+      const messageId = `chatcmpl-${requestId}`;
+
+      // Translate Anthropic stream to OpenAI format
+      for await (const chunk of translateAnthropicStreamToOpenAI(
+        response.body as AsyncIterable<Uint8Array>,
+        openaiRequest.model,
+        messageId
+      )) {
+        res.write(chunk);
+      }
+
+      res.end();
+
+      // Log streaming response
+      logger.logRequest(
+        requestId,
+        timestamp,
+        modifiedRequest,
+        hadSystemPrompt,
+        { status: response.status, data: null as any },
+        undefined,
+        'openai'
+      );
+    } else {
+      // Handle non-streaming response
+      if (!response.ok) {
+        const errorData = await response.json();
+        const openaiError = translateAnthropicErrorToOpenAI(errorData);
+        logger.logRequest(
+          requestId,
+          timestamp,
+          modifiedRequest,
+          hadSystemPrompt,
+          { status: response.status, data: errorData as any },
+          undefined,
+          'openai'
+        );
+        res.status(response.status).json(openaiError);
+        return;
+      }
+
+      const anthropicResponse = await response.json() as AnthropicResponse;
+      const openaiResponse = translateAnthropicToOpenAI(anthropicResponse, openaiRequest.model);
+
+      logger.logRequest(
+        requestId,
+        timestamp,
+        modifiedRequest,
+        hadSystemPrompt,
+        { status: response.status, data: anthropicResponse },
+        undefined,
+        'openai'
+      );
+
+      res.status(response.status).json(openaiResponse);
+    }
+
+  } catch (error) {
+    // Log the error
+    logger.logRequest(
+      requestId,
+      timestamp,
+      req.body as AnthropicRequest,
+      false,
+      undefined,
+      error instanceof Error ? error : new Error('Unknown error'),
+      'openai'
+    );
+
+    // Return OpenAI-format error
+    const openaiError = translateAnthropicErrorToOpenAI(
+      error instanceof Error ? { message: error.message } : { message: 'Unknown error' }
+    );
+
+    res.status(500).json(openaiError);
+  }
+};
+
+// Register endpoints conditionally based on configuration
+if (endpointConfig.anthropicEnabled) {
+  // Main Anthropic proxy endpoint
+  app.post('/v1/messages', handleMessagesRequest);
+
+  // Route alias to handle Stagehand v3 SDK bug that doubles the /v1 prefix
+  app.post('/v1/v1/messages', handleMessagesRequest);
+}
+
+if (endpointConfig.openaiEnabled) {
+  // OpenAI Chat Completions endpoint
+  app.post('/v1/chat/completions', handleChatCompletionsRequest);
+}
 
 // Startup sequence
 async function startRouter() {
@@ -270,10 +444,26 @@ async function startRouter() {
     logger.startup(`🚀 Router running on http://localhost:${PORT}`);
     logger.startup('');
     logger.startup('📋 Endpoints:');
-    logger.startup(`   POST http://localhost:${PORT}/v1/messages`);
+
+    if (endpointConfig.anthropicEnabled) {
+      logger.startup(`   POST http://localhost:${PORT}/v1/messages (Anthropic)`);
+    }
+
+    if (endpointConfig.openaiEnabled) {
+      logger.startup(`   POST http://localhost:${PORT}/v1/chat/completions (OpenAI)`);
+    }
+
     logger.startup(`   GET  http://localhost:${PORT}/health`);
     logger.startup('');
-    logger.startup('💡 Configure your AI tool to use http://localhost:' + PORT + ' as the base URL');
+
+    if (endpointConfig.anthropicEnabled && endpointConfig.openaiEnabled) {
+      logger.startup('💡 Both Anthropic and OpenAI endpoints are enabled');
+    } else if (endpointConfig.openaiEnabled) {
+      logger.startup('💡 OpenAI compatibility mode - configure tools to use OpenAI Chat Completions API');
+    } else {
+      logger.startup('💡 Configure your AI tool to use http://localhost:' + PORT + ' as the base URL');
+    }
+
     logger.startup('');
   });
 }
