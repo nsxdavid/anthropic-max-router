@@ -330,6 +330,29 @@ curl -X POST http://localhost:3000/v1/chat/completions \
   -d '{"model":"gpt-4","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
+#### **`GET /v1/models`** - List Available Models
+Returns a list of available Claude models from Anthropic.
+
+**⚠️ Important:** This endpoint requires an Anthropic API key (not OAuth). The API key is **only used for this endpoint** - all other endpoints use OAuth authentication.
+
+```bash
+curl http://localhost:3000/v1/models \
+  -H "x-api-key: sk-ant-api03-..."
+```
+
+**Why an API key?** Anthropic's `/v1/models` endpoint doesn't support OAuth authentication - it requires an API key. When you provide one, the router proxies your request to Anthropic's API to fetch the current model list.
+
+**Without an API key:**
+```json
+{
+  "type": "error",
+  "error": {
+    "type": "authentication_error",
+    "message": "x-api-key header is required for /v1/models endpoint. Note: API key is only used for this endpoint; other endpoints use OAuth authentication."
+  }
+}
+```
+
 #### **`GET /health`** - Health check
 ```bash
 curl http://localhost:3000/health

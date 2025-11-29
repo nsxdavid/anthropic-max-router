@@ -158,6 +158,46 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'anthropic-max-plan-router' });
 });
 
+// OpenAI Models endpoint - proxy to Anthropic API with API key
+app.get('/v1/models', async (req: Request, res: Response) => {
+  try {
+    // Check for API key in headers
+    const apiKey = req.headers['x-api-key'] || 
+                   (req.headers['authorization']?.startsWith('Bearer ') ? 
+                    req.headers['authorization'].substring(7) : null);
+
+    if (!apiKey) {
+      res.status(401).json({
+        type: 'error',
+        error: {
+          type: 'authentication_error',
+          message: 'x-api-key header is required for /v1/models endpoint. Note: API key is only used for this endpoint; other endpoints use OAuth authentication.'
+        }
+      });
+      return;
+    }
+    
+    const response = await fetch('https://api.anthropic.com/v1/models', {
+      method: 'GET',
+      headers: {
+        'x-api-key': apiKey as string,
+        'anthropic-version': ANTHROPIC_VERSION,
+      },
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    res.status(500).json({
+      type: 'error',
+      error: {
+        type: 'internal_error',
+        message: error instanceof Error ? error.message : 'Failed to fetch models'
+      }
+    });
+  }
+});
+
 // Shared handler for /v1/messages endpoint
 const handleMessagesRequest = async (req: Request, res: Response) => {
   const requestId = Math.random().toString(36).substring(7);

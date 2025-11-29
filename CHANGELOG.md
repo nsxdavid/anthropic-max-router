@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0] - 2025-11-29
+
+### Added
+- **`GET /v1/models` endpoint** - List available Claude models from Anthropic
+  - Proxies to Anthropic's `/v1/models` API endpoint
+  - Requires Anthropic API key authentication (not OAuth)
+  - Returns current list of available Claude models
+  - Compatible with OpenAI-compatible tools that query model lists (e.g., n8n)
+  - Clear error message when API key is not provided, explaining it's only needed for this endpoint
+
+### Changed
+- **Documentation** - Added comprehensive `/v1/models` endpoint documentation
+  - Explains why API key is required (Anthropic's endpoint doesn't support OAuth)
+  - Clarifies API key is ONLY used for `/v1/models`, not other endpoints
+  - Usage examples with curl
+  - Error response documentation
+
+### Notes
+- The `/v1/models` endpoint is the only endpoint that requires an API key
+- All other endpoints (`/v1/messages`, `/v1/chat/completions`) continue to use OAuth authentication
+- This enables better compatibility with tools like N8n that expect to query available models
+
 ## [1.2.2] - 2025-11-25
 
 ### Fixed
