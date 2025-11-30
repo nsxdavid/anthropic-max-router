@@ -13,6 +13,7 @@ import {
   OpenAIChatCompletionRequest,
   OpenAIMessage,
   OpenAITool,
+  AnyOpenAITool,
   OpenAIChatCompletionResponse,
   OpenAIChatCompletionChunk,
   OpenAIErrorResponse,
@@ -21,7 +22,8 @@ import {
   Message,
   SystemMessage,
   Tool,
-  ContentBlock
+  ContentBlock,
+  ValidationError
 } from '../types.js';
 import { mapOpenAIModelToAnthropic } from './model-mapper.js';
 
@@ -112,15 +114,28 @@ export function translateOpenAIToAnthropic(
 
 /**
  * Translate OpenAI tool to Anthropic tool
+ * Supports both standard OpenAI format and flattened format (used by Cursor)
  */
-function translateOpenAIToolToAnthropic(openaiTool: OpenAITool): Tool {
+function translateOpenAIToolToAnthropic(openaiTool: AnyOpenAITool): Tool {
+  // Handle flattened format (Cursor): { type, name, description, parameters }
+  // vs standard OpenAI format: { type, function: { name, description, parameters } }
+  const funcDef = 'function' in openaiTool ? openaiTool.function : openaiTool;
+
+  if (!funcDef.name || typeof funcDef.name !== 'string') {
+    throw new ValidationError('Invalid tool definition: "name" is required and must be a string');
+  }
+
+  if (!funcDef.description || typeof funcDef.description !== 'string') {
+    throw new ValidationError('Invalid tool definition: "description" is required and must be a string');
+  }
+
   return {
-    name: openaiTool.function.name,
-    description: openaiTool.function.description,
+    name: funcDef.name,
+    description: funcDef.description,
     input_schema: {
       type: 'object',
-      properties: openaiTool.function.parameters.properties,
-      required: openaiTool.function.parameters.required
+      properties: funcDef.parameters?.properties || {},
+      required: funcDef.parameters?.required || []
     }
   };
 }
@@ -309,13 +324,26 @@ export function translateAnthropicErrorToOpenAI(
  * Validate OpenAI request and throw errors for unsupported features
  */
 export function validateOpenAIRequest(request: OpenAIChatCompletionRequest): void {
+  // Validate required fields
+  if (!request.messages || !Array.isArray(request.messages)) {
+    throw new ValidationError('Invalid request: "messages" field is required and must be an array');
+  }
+
+  if (request.messages.length === 0) {
+    throw new ValidationError('Invalid request: "messages" array cannot be empty');
+  }
+
+  if (!request.model || typeof request.model !== 'string' || request.model.trim().length === 0) {
+    throw new ValidationError('Invalid request: "model" field is required and must be a non-empty string');
+  }
+
   // Error on unsupported features that would change behavior
   if (request.n && request.n > 1) {
-    throw new Error('Multiple completions (n > 1) are not supported. Anthropic only returns one completion.');
+    throw new ValidationError('Multiple completions (n > 1) are not supported. Anthropic only returns one completion.');
   }
 
   if (request.logprobs) {
-    throw new Error('Log probabilities (logprobs) are not supported by Anthropic API.');
+    throw new ValidationError('Log probabilities (logprobs) are not supported by Anthropic API.');
   }
 
   // Warn about ignored parameters (these won't cause errors but won't work as expected)

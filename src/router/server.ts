@@ -9,7 +9,8 @@ import {
   AnthropicRequest,
   AnthropicResponse,
   OpenAIChatCompletionRequest,
-  OpenAIChatCompletionResponse
+  OpenAIChatCompletionResponse,
+  ValidationError
 } from '../types.js';
 import { logger, LogLevel } from './logger.js';
 import {
@@ -296,7 +297,11 @@ const handleChatCompletionsRequest = async (req: Request, res: Response) => {
 
   try {
     // Get the request body as an OpenAI request
-    const openaiRequest = req.body as OpenAIChatCompletionRequest;
+    // Support 'input' as alias for 'messages' (used by some clients like Cursor)
+    const rawBody = req.body;
+    const openaiRequest = (rawBody.input && !rawBody.messages)
+      ? { ...rawBody, messages: rawBody.input, input: undefined } as OpenAIChatCompletionRequest
+      : rawBody as OpenAIChatCompletionRequest;
 
     // Validate the request
     validateOpenAIRequest(openaiRequest);
@@ -401,12 +406,15 @@ const handleChatCompletionsRequest = async (req: Request, res: Response) => {
       'openai'
     );
 
+    // Determine status code (400 for validation errors, 500 for others)
+    const statusCode = error instanceof ValidationError ? error.statusCode : 500;
+
     // Return OpenAI-format error
     const openaiError = translateAnthropicErrorToOpenAI(
       error instanceof Error ? { message: error.message } : { message: 'Unknown error' }
     );
 
-    res.status(500).json(openaiError);
+    res.status(statusCode).json(openaiError);
   }
 };
 

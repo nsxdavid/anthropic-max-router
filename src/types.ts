@@ -138,7 +138,7 @@ export interface OpenAIToolCall {
 }
 
 /**
- * OpenAI Tool Definition
+ * OpenAI Tool Definition (standard format)
  */
 export interface OpenAITool {
   type: 'function';
@@ -151,6 +151,38 @@ export interface OpenAITool {
       required?: string[];
     };
   };
+}
+
+/**
+ * Flattened Tool Definition (used by Cursor IDE)
+ */
+export interface FlattenedTool {
+  type: 'function';
+  name: string;
+  description: string;
+  parameters: {
+    type: 'object';
+    properties: Record<string, any>;
+    required?: string[];
+  };
+}
+
+/**
+ * Union type for tool definitions (supports both formats)
+ */
+export type AnyOpenAITool = OpenAITool | FlattenedTool;
+
+/**
+ * Validation error with HTTP status code for proper client error responses
+ */
+export class ValidationError extends Error {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number = 400) {
+    super(message);
+    this.name = 'ValidationError';
+    this.statusCode = statusCode;
+  }
 }
 
 /**
