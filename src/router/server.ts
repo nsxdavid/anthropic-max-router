@@ -295,6 +295,13 @@ const handleMessagesRequest = async (req: Request, res: Response) => {
       error instanceof Error ? error : new Error('Unknown error')
     );
 
+    // If headers were already sent (e.g., streaming response in progress),
+    // we cannot send an error response - just log and return
+    if (res.headersSent) {
+      logger.error(`[${requestId}] Error occurred after headers sent:`, error);
+      return;
+    }
+
     // Handle specific error cases
     if (error instanceof Error) {
       res.status(500).json({
@@ -443,6 +450,13 @@ const handleChatCompletionsRequest = async (req: Request, res: Response) => {
       error instanceof Error ? error : new Error('Unknown error'),
       'openai'
     );
+
+    // If headers were already sent (e.g., streaming response in progress),
+    // we cannot send an error response - just log and return
+    if (res.headersSent) {
+      logger.error(`[${requestId}] Error occurred after headers sent:`, error);
+      return;
+    }
 
     // Return OpenAI-format error
     const openaiError = translateAnthropicErrorToOpenAI(
