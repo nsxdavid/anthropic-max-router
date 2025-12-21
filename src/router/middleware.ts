@@ -5,6 +5,37 @@ export const REQUIRED_SYSTEM_PROMPT: SystemMessage = {
   text: "You are Claude Code, Anthropic's official CLI for Claude.",
 };
 
+// List of valid top-level fields for Anthropic API requests
+const VALID_REQUEST_FIELDS = new Set([
+  'model',
+  'max_tokens',
+  'system',
+  'messages',
+  'tools',
+  'tool_choice',
+  'stream',
+  'temperature',
+  'top_p',
+  'top_k',
+  'stop_sequences',
+  'metadata',
+  'thinking',
+]);
+
+/**
+ * Strips unknown fields from the request to prevent API errors
+ * Fields like 'context_management' from the Agent SDK are not supported
+ */
+export function stripUnknownFields(request: Record<string, unknown>): AnthropicRequest {
+  const sanitized: Record<string, unknown> = {};
+  for (const key of Object.keys(request)) {
+    if (VALID_REQUEST_FIELDS.has(key)) {
+      sanitized[key] = request[key];
+    }
+  }
+  return sanitized as unknown as AnthropicRequest;
+}
+
 /**
  * Normalizes system prompt to SystemMessage[] format
  * Handles both string and array inputs

@@ -4,7 +4,7 @@ import express, { Request, Response } from 'express';
 import readline from 'readline';
 import { getValidAccessToken, loadTokens, saveTokens } from '../token-manager.js';
 import { startOAuthFlow, exchangeCodeForTokens } from '../oauth.js';
-import { ensureRequiredSystemPrompt } from './middleware.js';
+import { ensureRequiredSystemPrompt, stripUnknownFields } from './middleware.js';
 import { AnthropicRequest, AnthropicResponse, OpenAIChatCompletionRequest } from '../types.js';
 import { logger } from './logger.js';
 import {
@@ -222,8 +222,8 @@ const handleMessagesRequest = async (req: Request, res: Response) => {
   const timestamp = new Date().toISOString();
 
   try {
-    // Get the request body as an AnthropicRequest
-    const originalRequest = req.body as AnthropicRequest;
+    // Get the request body and strip unknown fields (e.g., context_management from Agent SDK)
+    const originalRequest = stripUnknownFields(req.body as Record<string, unknown>);
 
     const hadSystemPrompt = !!(originalRequest.system && originalRequest.system.length > 0);
 
@@ -294,6 +294,13 @@ const handleMessagesRequest = async (req: Request, res: Response) => {
       undefined,
       error instanceof Error ? error : new Error('Unknown error')
     );
+
+    // If headers were already sent (e.g., streaming response in progress),
+    // we cannot send an error response - just log and return
+    if (res.headersSent) {
+      logger.error(`[${requestId}] Error occurred after headers sent:`, error);
+      return;
+    }
 
     // Handle specific error cases
     if (error instanceof Error) {
@@ -443,6 +450,13 @@ const handleChatCompletionsRequest = async (req: Request, res: Response) => {
       error instanceof Error ? error : new Error('Unknown error'),
       'openai'
     );
+
+    // If headers were already sent (e.g., streaming response in progress),
+    // we cannot send an error response - just log and return
+    if (res.headersSent) {
+      logger.error(`[${requestId}] Error occurred after headers sent:`, error);
+      return;
+    }
 
     // Return OpenAI-format error
     const openaiError = translateAnthropicErrorToOpenAI(
